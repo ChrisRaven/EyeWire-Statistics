@@ -15,25 +15,30 @@
 // ==/UserScript==
 
 /*jshint esversion: 6 */
-/*globals $, account, GM_xmlhttpRequest, Chart */
+/*globals $, GM_xmlhttpRequest, Chart */
 
 const LOCAL = true;
+if (LOCAL) {
+  console.log('%c--== TURN OFF "LOCAL" BEFORE RELEASING!!! ==--', "color: red; font-style: italic; font-weight: bold;");
+}
 
+
+// source: https://eyewire.org/1.0/countries/
 const countries = {"af":"Afghanistan","ax":"Aland Islands","al":"Albania","dz":"Algeria","as":"American Samoa","ad":"Andorra","ao":"Angola","ai":"Anguilla","aq":"Antarctica","ag":"Antigua and Barbuda","ar":"Argentina","am":"Armenia","aw":"Aruba","au":"Australia","at":"Austria","az":"Azerbaijan","bs":"Bahamas","bh":"Bahrain","bd":"Bangladesh","bb":"Barbados","by":"Belarus","be":"Belgium","bz":"Belize","bj":"Benin","bm":"Bermuda","bt":"Bhutan","bo":"Bolivia","bq":"Bonaire, Saint Eustatius and Saba","ba":"Bosnia and Herzegovina","bw":"Botswana","br":"Brazil","io":"British Indian Ocean Territory","bn":"Brunei Darussalam","bg":"Bulgaria","bf":"Burkina Faso","bi":"Burundi","kh":"Cambodia","cm":"Cameroon","ca":"Canada","cv":"Cape Verde","ky":"Cayman Islands","cf":"Central African Republic","td":"Chad","cl":"Chile","cn":"China","cx":"Christmas Island","cc":"Cocos (Keeling) Islands","co":"Colombia","km":"Comoros","cg":"Congo","cd":"Congo, The Democratic Republic of the","ck":"Cook Islands","cr":"Costa Rica","ci":"Cote D'Ivoire","hr":"Croatia","cu":"Cuba","cw":"Curacao","cy":"Cyprus","cz":"Czech Republic","dk":"Denmark","dj":"Djibouti","dm":"Dominica","do":"Dominican Republic","ec":"Ecuador","eg":"Egypt","sv":"El Salvador","gq":"Equatorial Guinea","er":"Eritrea","ee":"Estonia","et":"Ethiopia","eu":"Europe","hq":"EyeWire HQ","fk":"Falkland Islands (Malvinas)","fo":"Faroe Islands","fj":"Fiji","fi":"Finland","fr":"France","gf":"French Guiana","pf":"French Polynesia","tf":"French Southern Territories","ga":"Gabon","gm":"Gambia","ge":"Georgia","de":"Germany","gh":"Ghana","gi":"Gibraltar","gr":"Greece","gl":"Greenland","gd":"Grenada","gp":"Guadeloupe","gu":"Guam","gt":"Guatemala","gg":"Guernsey","gn":"Guinea","gw":"Guinea-Bissau","gy":"Guyana","ht":"Haiti","va":"Holy See (Vatican City State)","hn":"Honduras","hk":"Hong Kong","hu":"Hungary","is":"Iceland","in":"India","id":"Indonesia","ir":"Iran, Islamic Republic of","iq":"Iraq","ie":"Ireland","im":"Isle of Man","il":"Israel","it":"Italy","jm":"Jamaica","jp":"Japan","je":"Jersey","jo":"Jordan","kz":"Kazakhstan","ke":"Kenya","ki":"Kiribati","kp":"Korea, Democratic People's Republic of","kr":"Korea, Republic of","kw":"Kuwait","kg":"Kyrgyzstan","la":"Lao People's Democratic Republic","lv":"Latvia","lb":"Lebanon","ls":"Lesotho","lr":"Liberia","ly":"Libya","li":"Liechtenstein","lt":"Lithuania","lu":"Luxembourg","mo":"Macau","mk":"Macedonia","mg":"Madagascar","mw":"Malawi","my":"Malaysia","mv":"Maldives","ml":"Mali","mt":"Malta","mh":"Marshall Islands","mq":"Martinique","mr":"Mauritania","mu":"Mauritius","yt":"Mayotte","mx":"Mexico","fm":"Micronesia, Federated States of","md":"Moldova, Republic of","mc":"Monaco","mn":"Mongolia","me":"Montenegro","ms":"Montserrat","ma":"Morocco","mz":"Mozambique","mm":"Myanmar","na":"Namibia","nr":"Nauru","np":"Nepal","nl":"Netherlands","nc":"New Caledonia","nz":"New Zealand","ni":"Nicaragua","ne":"Niger","ng":"Nigeria","nu":"Niue","nf":"Norfolk Island","mp":"Northern Mariana Islands","no":"Norway","om":"Oman","pk":"Pakistan","pw":"Palau","ps":"Palestinian Territory","pa":"Panama","pg":"Papua New Guinea","py":"Paraguay","pe":"Peru","ph":"Philippines","pn":"Pitcairn Islands","pl":"Poland","pt":"Portugal","pr":"Puerto Rico","qa":"Qatar","re":"Reunion","ro":"Romania","ru":"Russian Federation","rw":"Rwanda","bl":"Saint Barthelemy","sh":"Saint Helena","kn":"Saint Kitts and Nevis","lc":"Saint Lucia","mf":"Saint Martin","pm":"Saint Pierre and Miquelon","vc":"Saint Vincent and the Grenadines","ws":"Samoa","sm":"San Marino","st":"Sao Tome and Principe","sa":"Saudi Arabia","sn":"Senegal","rs":"Serbia","sc":"Seychelles","sl":"Sierra Leone","sg":"Singapore","sx":"Sint Maarten (Dutch part)","sk":"Slovakia","si":"Slovenia","sb":"Solomon Islands","so":"Somalia","za":"South Africa","gs":"South Georgia and the South Sandwich Islands","ss":"South Sudan","es":"Spain","lk":"Sri Lanka","sd":"Sudan","sr":"Suriname","sj":"Svalbard and Jan Mayen","sz":"Swaziland","se":"Sweden","ch":"Switzerland","sy":"Syrian Arab Republic","tw":"Taiwan","tj":"Tajikistan","tz":"Tanzania, United Republic of","th":"Thailand","tl":"Timor-Leste","tg":"Togo","tk":"Tokelau","to":"Tonga","tt":"Trinidad and Tobago","tn":"Tunisia","tr":"Turkey","tm":"Turkmenistan","tc":"Turks and Caicos Islands","tv":"Tuvalu","ug":"Uganda","ua":"Ukraine","ae":"United Arab Emirates","gb":"United Kingdom","us":"United States","um":"United States Minor Outlying Islands","rd":"Unknown","uy":"Uruguay","uz":"Uzbekistan","vu":"Vanuatu","ve":"Venezuela","vn":"Vietnam","vg":"Virgin Islands, British","vi":"Virgin Islands, U.S.","wf":"Wallis and Futuna","eh":"Western Sahara","ye":"Yemen","zm":"Zambia","zw":"Zimbabwe"};
 
 (function() {
   'use strict';
   'esversion: 6';
 
-  var Utils = {
+  var K = {
     gid: function (id) {
       return document.getElementById(id);
     },
-    
+
     qS: function (sel) {
       return document.querySelector(sel);
     },
-    
+
     qSa: function (sel) {
       return document.querySelectorAll(sel);
     },
@@ -62,39 +67,6 @@ const countries = {"af":"Afghanistan","ax":"Aland Islands","al":"Albania","dz":"
       return (x.length == 1) ? '0' + x : x;
     },
 
-    // Source: https://stackoverflow.com/a/6805461
-    injectJS: function (text, sURL) {
-      var
-        tgt,
-        scriptNode = document.createElement('script');
-
-      scriptNode.type = "text/javascript";
-      if (text) {
-        scriptNode.textContent = text;
-      }
-      if (sURL) {
-        scriptNode.src = sURL;
-      }
-
-      tgt = document.getElementsByTagName('head')[0] || document.body || document.documentElement;
-      tgt.appendChild(scriptNode);
-    },
-    
-    // localStorage
-    ls: {
-      get: function (key) {
-        return localStorage.getItem(account.account.uid + '-ews-' + key);
-      },
-
-      set: function (key, val) {
-        localStorage.setItem(account.account.uid + '-ews-' + key, val);
-      },
-
-      remove: function (key) {
-        localStorage.removeItem(account.account.uid + '-ews-' + key);
-      }
-    },
-    
     date: {
       dayLengthInMs: 1000 * 60 * 60 * 24,
       // returns date in format of YYYY-MM-DD
@@ -105,7 +77,7 @@ const countries = {"af":"Afghanistan","ax":"Aland Islands","al":"Albania","dz":"
             day: 'numeric'
           }).format(date);
       },
-      
+
       // returns a string in format YYYY-MM-DD calculated basing on the user time
       calculateHqDate: function () {
         return new Intl.DateTimeFormat('en-CA', {
@@ -117,7 +89,7 @@ const countries = {"af":"Afghanistan","ax":"Aland Islands","al":"Albania","dz":"
       },
 
       getWeek: function (date) {
-        let firstDayOfTheYear = Utils.date.firstDayOfAYear(date.getFullYear());
+        let firstDayOfTheYear = K.date.firstDayOfAYear(date.getFullYear());
         let firstWednesday = 7 - firstDayOfTheYear - 3;
         if (firstWednesday <= 0) {
           firstWednesday += 7;
@@ -134,17 +106,17 @@ const countries = {"af":"Afghanistan","ax":"Aland Islands","al":"Albania","dz":"
       isLeapYear: function (year) {
         return ((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0);
       },
-      
+
       firstDayOfAYear: function (year) {
         // 0 = Sunday, 1 = Monday, etc.
         return (new Date(year, 0, 1)).getDay();
       },
-      
+
       numberOfWeeksInAYear: function (year) {
         // assuming, that week belongs to the year, which contains the middle day
         // of that week (which is Wednesday in case of Sun-Mon week)
-        let firstDay = Utils.date.firstDayOfAYear(year);
-        if (firstDay === 3 || Utils.date.isLeapYear(year) && (firstDay === 2 || firstDay === 4)) {
+        let firstDay = K.date.firstDayOfAYear(year);
+        if (firstDay === 3 || K.date.isLeapYear(year) && (firstDay === 2 || firstDay === 4)) {
           return 53;
         }
         return 52;
@@ -153,15 +125,15 @@ const countries = {"af":"Afghanistan","ax":"Aland Islands","al":"Albania","dz":"
       getLast: {
         sevenDays: function (asDates = false) {
           let result = [];
-          let currentHqDate = new Date(Utils.date.calculateHqDate());
+          let currentHqDate = new Date(K.date.calculateHqDate());
           let weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-          let currentDayOfWeek = currentHqDate.getDay();  
+          let currentDayOfWeek = currentHqDate.getDay();
           let weekLength = 7;
           let cursor;
 
           if (asDates) {
             cursor = new Date();
-            cursor.setTime(currentHqDate.getTime() - weekLength * Utils.date.dayLengthInMs);
+            cursor.setTime(currentHqDate.getTime() - weekLength * K.date.dayLengthInMs);
 
             while (weekLength--) {
               result.push(new Intl.DateTimeFormat('en-CA', {
@@ -191,17 +163,17 @@ const countries = {"af":"Afghanistan","ax":"Aland Islands","al":"Albania","dz":"
 
         tenWeeks: function (asDates = false) {
           let result = [];
-          let currentHqDate = new Date(Utils.date.calculateHqDate());
+          let currentHqDate = new Date(K.date.calculateHqDate());
           let year = currentHqDate.getFullYear();
-          let currentWeek = Utils.date.getWeek(currentHqDate);
+          let currentWeek = K.date.getWeek(currentHqDate);
           let periodLength = 10;
           // -1 below, because we want the last day of the period to be the last completed week, not the current one,
           // but +1, because we want to start at the first day of the period not from
           // before the period started
           let starter = currentWeek - periodLength - 1 + 1;
           let cursor;
-          let numberOfWeeksInTheCurrentYear = Utils.date.numberOfWeeksInAYear(year);
-          let numberOfWeeksInThePreviousYear = Utils.date.numberOfWeeksInAYear(year - 1);
+          let numberOfWeeksInTheCurrentYear = K.date.numberOfWeeksInAYear(year);
+          let numberOfWeeksInThePreviousYear = K.date.numberOfWeeksInAYear(year - 1);
 
           if (asDates) {
             if (starter <= 0) {
@@ -240,13 +212,13 @@ const countries = {"af":"Afghanistan","ax":"Aland Islands","al":"Albania","dz":"
 
         twelveMonths: function (asDates = false) {
           let result = [];
-          let currentHqDate = new Date(Utils.date.calculateHqDate());
+          let currentHqDate = new Date(K.date.calculateHqDate());
           let months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
           let currentMonth = currentHqDate.getMonth();
           let year = currentHqDate.getFullYear();
           let yearLength = 12;
           let cursor = currentMonth;
-          
+
           // no matter what, if we substract 12 months from the current date, we'll be in the previous year
           --year;
 
@@ -287,29 +259,17 @@ const countries = {"af":"Afghanistan","ax":"Aland Islands","al":"Albania","dz":"
           return 30;
         }
         if (month === 'February') {
-          return Utils.date.isLeapYear(year) ? 29 : 28;
+          return K.date.isLeapYear(year) ? 29 : 28;
         }
         return 31;
       },
-      
+
       monthsFullNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
     }
   };
 
 
-  var intv = setInterval(function () {
-    if (typeof account === 'undefined' || !account.account.uid) {
-      return;
-    }
-    clearInterval(intv);
-    main();
-  }, 100);
-  
-  function main() {
 
-  
-
-// STATS PANEL
 function StatsPanel() {
   var
     _this = this,
@@ -320,7 +280,7 @@ function StatsPanel() {
   this.map = null;
   this.dataType = 'points';
   this.timeRange = 'day';
-  
+
   (function addMenuItem() {
     var
       li, a, list;
@@ -331,19 +291,19 @@ function StatsPanel() {
     a.id = 'ewsLink';
     a.innerHTML = 'Stats';
     li.appendChild(a);
-    list = Utils.gid('nav').getElementsByTagName('ul')[0];
+    list = K.gid('nav').getElementsByTagName('ul')[0];
     if (list) {
       list.insertBefore(li, list.lastChild.previousSibling); // for some reason the last child (the "Challenge" button) isn't the last child)
     }
     else {
       let ul = document.createElement('ul');
       ul.appendChild(li);
-      Utils.gid('homelogo').after(ul);
+      K.gid('homelogo').after(ul);
     }
-    
+
   })();
 
-  // Stats dialog skeleton  
+  // Stats dialog skeleton
   $('body').append(
    `<div id=ewsPanel>
       <div class="ewsNavButtonGroup" id=ewsTimeRangeSelection>
@@ -423,30 +383,30 @@ function StatsPanel() {
     <div id=ewsWorldMap style="width: 873px;"></div>
     `
   );
-  
+
   let s = {
     day: {
-      year: Utils.gid('ewsTRSdayYear'),
-      month: Utils.gid('ewsTRSdayMonth'),
-      day: Utils.gid('ewsTRSdayDay')
+      year: K.gid('ewsTRSdayYear'),
+      month: K.gid('ewsTRSdayMonth'),
+      day: K.gid('ewsTRSdayDay')
     },
     week: {
-      year: Utils.gid('ewsTRSweekYear'),
-      week: Utils.gid('ewsTRSweekWeek')
+      year: K.gid('ewsTRSweekYear'),
+      week: K.gid('ewsTRSweekWeek')
     },
     month: {
-      year: Utils.gid('ewsTRSmonthYear'),
-      month: Utils.gid('ewsTRSmonthMonth')
+      year: K.gid('ewsTRSmonthYear'),
+      month: K.gid('ewsTRSmonthMonth')
     },
     customFrom: {
-      year: Utils.gid('ewsTRScustomFromYear'),
-      month: Utils.gid('ewsTRScustomFromMonth'),
-      day: Utils.gid('ewsTRScustomFromDay')
+      year: K.gid('ewsTRScustomFromYear'),
+      month: K.gid('ewsTRScustomFromMonth'),
+      day: K.gid('ewsTRScustomFromDay')
     },
     customTo: {
-      year: Utils.gid('ewsTRScustomToYear'),
-      month: Utils.gid('ewsTRScustomToMonth'),
-      day: Utils.gid('ewsTRScustomToDay')
+      year: K.gid('ewsTRScustomToYear'),
+      month: K.gid('ewsTRScustomToMonth'),
+      day: K.gid('ewsTRScustomToDay')
     }
   };
 
@@ -509,14 +469,14 @@ function StatsPanel() {
       }
     })
     .css('display', 'block');
-    
-    
+
+
   function optionsYears(select) {
     let str = '';
     for (let i = 2017; i < 2100; i++) {
       str += '<option value="' + i + '"' + (i === select ? ' selected' : '') + '>' + i;
     }
-    
+
     return str;
   }
 
@@ -525,18 +485,18 @@ function StatsPanel() {
     if (select === 0) {
       select = 12;
     }
-    for (let i = 1, len = Utils.date.monthsFullNames.length + 1; i < len; i++) {
-      str += '<option value="' + (i < 10 ? '0' : '') + i + '"' + (i === select ? ' selected' : '') + '>' + Utils.date.monthsFullNames[i - 1];
+    for (let i = 1, len = K.date.monthsFullNames.length + 1; i < len; i++) {
+      str += '<option value="' + (i < 10 ? '0' : '') + i + '"' + (i === select ? ' selected' : '') + '>' + K.date.monthsFullNames[i - 1];
     }
-    
+
     return str;
   }
-  
+
   function optionsWeeks(year, month, day) {
     let str = '';
     let val, txt, dt;
-    let firstDayOfTheYear = Utils.date.firstDayOfAYear(year);
-    let numberOfWeeks = Utils.date.numberOfWeeksInAYear(year);
+    let firstDayOfTheYear = K.date.firstDayOfAYear(year);
+    let numberOfWeeks = K.date.numberOfWeeksInAYear(year);
     let dayLengthInMs = 24 * 60 * 60 * 1000;
     let dateDiff = 0;
     let selected = false;
@@ -557,11 +517,11 @@ function StatsPanel() {
           selected = false;
         }
       }
-      dt = Utils.date.ISO8601DateStr(date);
+      dt = K.date.ISO8601DateStr(date);
       val = (i < 10 ? '0' : '') + i + '|' + dt;
       txt = i + ' (' + dt + ' - ';
       date.setDate(date.getDate() + 6);
-      dt = Utils.date.ISO8601DateStr(date);
+      dt = K.date.ISO8601DateStr(date);
       val += '|' + dt;
       txt += dt + ')';
       str += '<option value="' + val + '"' + (selected ? ' selected' : '') + '>' + txt;
@@ -572,15 +532,15 @@ function StatsPanel() {
 
   function optionsDays(year, month, select) {
     let str = '';
-    for (let i = 1, len = Utils.date.daysInMonth(month, year) + 1; i < len; i++) {
+    for (let i = 1, len = K.date.daysInMonth(month, year) + 1; i < len; i++) {
       str += '<option value="' + (i < 10 ? '0' : '') + i + '"' + (i === select ? ' selected' : '') + '>' + i;
     }
-    
+
     return str;
   }
 
-  
-  let date = new Date(Utils.date.calculateHqDate());
+
+  let date = new Date(K.date.calculateHqDate());
   let currentMonth = date.getMonth() + 1;
   date.setDate(date.getDate() - 1); // data for today is not available today
   let year = date.getFullYear();
@@ -597,7 +557,7 @@ function StatsPanel() {
 
   s.month.year.innerHTML = optionsYears(year);
   s.month.month.innerHTML = optionsMonths(currentMonth - 1);
-  
+
   s.customFrom.year.innerHTML = optionsYears(year);
   s.customFrom.month.innerHTML = optionsMonths(month);
   s.customFrom.day.innerHTML = optionsDays(year, month, day);
@@ -605,11 +565,11 @@ function StatsPanel() {
   s.customTo.year.innerHTML = optionsYears(year);
   s.customTo.month.innerHTML = optionsMonths(month);
   s.customTo.day.innerHTML = optionsDays(year, month, day);
-  
+
   s.customFrom.year.dataset.previousValue = s.customFrom.year.value;
   s.customFrom.month.dataset.previousValue = s.customFrom.month.value;
   s.customFrom.day.dataset.previousValue = s.customFrom.day.value;
-  
+
   s.customTo.year.dataset.previousValue = s.customTo.year.value;
   s.customTo.month.dataset.previousValue = s.customTo.month.value;
   s.customTo.day.dataset.previousValue = s.customTo.day.value;
@@ -618,37 +578,37 @@ function StatsPanel() {
     // if the selected month is February, we have to be update the number of days
     // according to the year (if is leap or not)
     let idPart = this.id.replace('ewsTRS', '').replace('Year', '');
-    if (Utils.gid('ewsTRS' + idPart + 'Month').value === '2') {
-      Utils.gid('ewsTRS' + idPart + 'Day').innerHTML = optionsDays(this.value, Utils.date.monthsFullNames[1], 1);
+    if (K.gid('ewsTRS' + idPart + 'Month').value === '2') {
+      K.gid('ewsTRS' + idPart + 'Day').innerHTML = optionsDays(this.value, K.date.monthsFullNames[1], 1);
     }
   });
-  
+
   $('#ewsTRSdayMonth, #ewsTRScustomFromMonth, #ewsTRScustomToMonth').change(function () {
     let idPart = this.id.replace('ewsTRS', '').replace('Month', '');
-    let year = Utils.gid('ewsTRS' + idPart + 'Year').value;
+    let year = K.gid('ewsTRS' + idPart + 'Year').value;
     let month =  this.options[this.selectedIndex].text;
-    Utils.gid('ewsTRS' + idPart + 'Day').innerHTML = optionsDays(year, month, 1);
+    K.gid('ewsTRS' + idPart + 'Day').innerHTML = optionsDays(year, month, 1);
   });
-  
-  
+
+
   $('#ewsTRSweekYear').change(function () {
     s.week.week.innerHTML = optionsWeeks(this.value);
   });
-  
+
   $('#ewsTRScustomFromYear, #ewsTRScustomFromMonth, #ewsTRScustomFromDay, #ewsTRScustomToYear, #ewsTRScustomToMonth, #ewsTRScustomToDay').change(function () {
-    
+
     let fromYear = s.customFrom.year.value;
     let fromMonth = s.customFrom.month.value;
     let fromDay = s.customFrom.day.value;
-    
+
     let toYear = s.customTo.year.value;
     let toMonth = s.customTo.month.value;
     let toDay = s.customTo.day.value;
-    
+
     let previousFromYear = s.customFrom.year.dataset.previousValue;
     let previousFromMonth = s.customFrom.month.dataset.previousValue;
     let previousFromDay = s.customFrom.day.dataset.previousValue;
-    
+
     let previousToYear = s.customTo.year.dataset.previousValue;
     let previousToMonth = s.customTo.month.dataset.previousValue;
     let previousToDay = s.customTo.day.dataset.previousValue;
@@ -669,7 +629,7 @@ function StatsPanel() {
     }
   });
 
-  
+
   this.generateTableRow = function (position, flag, name, value, highlight) {
     return '<tr class="ewsRankingRow' + (highlight ? 'Highlight' : 'Normal') + '">' + // highlighting currently not used
         '<td>' + position + '</td>' +
@@ -700,7 +660,7 @@ function StatsPanel() {
 
   this.createTable = function (data, limit) {
     let tableData = [];
-      
+
     if (data === 'no-data') {
       tableData = data;
     }
@@ -732,7 +692,7 @@ function StatsPanel() {
 
 
   this.updateTable = function (data) {
-    Utils.gid('ewsLeftCell').innerHTML = this.createTable(data);
+    K.gid('ewsLeftCell').innerHTML = this.createTable(data);
   };
 
 
@@ -858,7 +818,7 @@ function StatsPanel() {
     this.map.params.series.regions[0].min = min;
     this.map.params.series.regions[0].max = max;
     this.map.series.regions[0].clear(); // if not cleared, the values, which aren't in the current set, remain from the previous set
-    
+
     if (values !== 'no-data') {
       this.map.series.regions[0].setValues(values);
     }
@@ -866,7 +826,7 @@ function StatsPanel() {
 
   this.createChart = function (label) {
       var
-        ctx = Utils.gid("ewsChart").getContext('2d');
+        ctx = K.gid("ewsChart").getContext('2d');
 
       chart = new Chart(ctx, {
         type: 'doughnut',
@@ -974,8 +934,8 @@ function StatsPanel() {
       date;
 
     if (data === 'no-data') {
-      Utils.gid('ewsChartCenterLabel').innerHTML = 'NO DATA';
-      Utils.gid('ewsChartLegend').innerHTML = '';
+      K.gid('ewsChartCenterLabel').innerHTML = 'NO DATA';
+      K.gid('ewsChartLegend').innerHTML = '';
       chart.config.data.labels = [];
       chart.config.data.datasets[0].data = [];
       chart.update();
@@ -1025,7 +985,7 @@ function StatsPanel() {
             break;
           case 'month':
             date = this.customDate.split('-');
-            html3 = ' in ' + Utils.date.monthsFullNames[date[1] - 1];
+            html3 = ' in ' + K.date.monthsFullNames[date[1] - 1];
             break;
           case 'custom':
             date = this.customDate.split('|').join(' and ');
@@ -1036,8 +996,8 @@ function StatsPanel() {
     }
 
 
-    Utils.gid('ewsChartCenterLabel').innerHTML = html1 + '<br><span>' + Utils.reduceArray(data) + '</span><br>' + html2 + html3;
-    Utils.gid('ewsChartLegend').innerHTML = chart.generateLegend(); // custom legend
+    K.gid('ewsChartCenterLabel').innerHTML = html1 + '<br><span>' + K.reduceArray(data) + '</span><br>' + html2 + html3;
+    K.gid('ewsChartLegend').innerHTML = chart.generateLegend(); // custom legend
   };
 
 
@@ -1119,10 +1079,10 @@ function StatsPanel() {
       html1, html2;
 
     if (arguments[0] && arguments[0] === 'no-data') {
-      Utils.gid('ewsAvg').innerHTML = 'NO DATA';
+      K.gid('ewsAvg').innerHTML = 'NO DATA';
       return;
     }
-    
+
     switch (this.dataType) {
       case 'points':
         html1 = 'points per user';
@@ -1144,21 +1104,21 @@ function StatsPanel() {
       html += '<br><br><br>Average of ' + html2 + ':<br><span>' + this.countAveragePerCountry() + '</span>';
     }
 
-    Utils.gid('ewsAvg').innerHTML = html;
+    K.gid('ewsAvg').innerHTML = html;
   };
 
 
   this.getData = function () {
     let url;
-    
+
     // we are checking for the class to take into account both clicking Apply
     // from the Custom dialog and changing the tabs at the bottom of the main dialog
-    if (Utils.gid('ewsCustomPeriodSelection').classList.contains('selected')) {
+    if (K.gid('ewsCustomPeriodSelection').classList.contains('selected')) {
       url = 'https://ewstats.feedia.co/custom_stats.php' +
         '?type=' + this.dataType +
         '&custom_range_type=' + this.customRangeType +
         '&date=' + this.customDate;
-      
+
       GM_xmlhttpRequest({
         method: 'GET',
         url: url,
@@ -1238,9 +1198,9 @@ function StatsPanel() {
     title: 'EyeWire Statistics <div class="blinky" id=ewsLoader>',
     width: 900,
     open: function (event, ui) {
-      let el = Utils.gid('ewsWorldMap');
+      let el = K.gid('ewsWorldMap');
       if (el.parentNode.tagName === 'BODY') {
-        let sibling = Utils.gid('ewsTimeRangeSelection');
+        let sibling = K.gid('ewsTimeRangeSelection');
         sibling.parentNode.insertBefore(el, sibling.nextSibling);
         el.style.visibility = 'visible';
         el.style.top = 'inherit';
@@ -1290,7 +1250,7 @@ function StatsPanel() {
     else if (data.timeRange) {
       _this.timeRange = data.timeRange;
     }
-    
+
     if (this.id === 'ewsCustomPeriodSelection') {
       $('#ewsCustomTimeRangeSelectionDialog').dialog('open');
     }
@@ -1301,42 +1261,18 @@ function StatsPanel() {
 
   this.createChart('points');
 }
-// end: STATS PANEL
 
 
 
-Utils.addCSSFile('https://chrisraven.github.io/KK-Statistics/jquery-jvectormap-2.0.3.css');
+K.addCSSFile('https://chrisraven.github.io/KK-Statistics/jquery-jvectormap-2.0.3.css');
 
 if (LOCAL) {
-  Utils.addCSSFile('http://127.0.0.1:8887/KK-Statistics.css');
+  K.addCSSFile('http://127.0.0.1:8887/KK-Statistics.css');
 }
 else {
-  Utils.addCSSFile('https://chrisraven.github.io/KK-Statistics/KK-Statistics.css');
+  K.addCSSFile('https://chrisraven.github.io/KK-Statistics/KK-Statistics.css');
 }
 
-
-
-Utils.injectJS(`
-  (function (open) {
-    XMLHttpRequest.prototype.open = function (method, url, async, user, pass) {
-      this.addEventListener("readystatechange", function (evt) {
-        if (this.readyState == 4 && this.status == 200 &&
-            url.indexOf('/1.0/task/') !== -1 &&
-            url.indexOf('/submit') === -1 &&
-            method.toLowerCase() === 'post') {
-          $(document).trigger('votes-updated', {cellId: tomni.cell, cellName: tomni.getCurrentCell().info.name, datasetId: tomni.getCurrentCell().info.dataset_id});
-        }
-        
-        if (this.readyState == 4 && this.status == 200 &&
-            url.indexOf('/stats') !== -1 &&
-            method.toLowerCase() === 'get') {
-          $(document).trigger('stats-collected');
-        }
-      }, false);
-      open.call(this, method, url, async, user, pass);
-    };
-  }) (XMLHttpRequest.prototype.open);
-`);
 
 
 // source: https://stackoverflow.com/a/14488776
@@ -1353,13 +1289,12 @@ $.widget('ui.dialog', $.extend({}, $.ui.dialog.prototype, {
 }));
 
 
-
-new StatsPanel(); // jshint ignore:line
-
-
-
-} // end: main()
-
+let intv = setInterval(function () {
+  if (typeof Chart !== 'undefined') {
+    clearInterval(intv);
+    new StatsPanel(); // jshint ignore:line
+  }
+}, 50);
 
 
 })(); // end: wrapper
