@@ -6,11 +6,11 @@
 // @author       Krzysztof Kruk
 // @match        https://*.eyewire.org/*
 // @exclude      https://*.eyewire.org/1.0/*
-// @downloadURL  https://raw.githubusercontent.com/ChrisRaven/KK-Statistics/master/KK-Statistics.user.js
+// @downloadURL  https://raw.githubusercontent.com/ChrisRaven/EyeWire-Statistics/master/statistics.user.js
 // @grant        GM_xmlhttpRequest
 // @connect      ewstats.feedia.co
-// @require      https://chrisraven.github.io/KK-Statistics/jquery-jvectormap-2.0.3.min.js
-// @require      https://chrisraven.github.io/KK-Statistics/jquery-jvectormap-world-mill.js
+// @require      https://chrisraven.github.io/EyeWire-Statistics/jquery-jvectormap-2.0.3.min.js
+// @require      https://chrisraven.github.io/EyeWire-Statistics/jquery-jvectormap-world-mill.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js
 // ==/UserScript==
 
@@ -1341,13 +1341,13 @@ function StatsPanel() {
 
 
 
-K.addCSSFile('https://chrisraven.github.io/KK-Statistics/jquery-jvectormap-2.0.3.css');
+K.addCSSFile('https://chrisraven.github.io/EyeWire-Statistics/jquery-jvectormap-2.0.3.css');
 
 if (LOCAL) {
-  K.addCSSFile('http://127.0.0.1:8887/KK-Statistics.css');
+  K.addCSSFile('http://127.0.0.1:8887/statistics.css');
 }
 else {
-  K.addCSSFile('https://chrisraven.github.io/KK-Statistics/KK-Statistics.css');
+  K.addCSSFile('https://chrisraven.github.io/EyeWire-Statistics/styles.css');
 }
 
 
