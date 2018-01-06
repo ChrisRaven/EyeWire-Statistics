@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         KK Statistics
+// @name         Statistics
 // @namespace    http://tampermonkey.net/
 // @version      3.0
 // @description  Shows EyeWire Statistics
@@ -1185,20 +1185,18 @@ function StatsPanel() {
             splittedDate = date.split('|');
             dateFrom = splittedDate[0];
             dateTo = splittedDate[1];
-            this.customRangeType = 'day';
             break;
         }
         url = 'http://ewstats.feedia.co/custom_stats.php' +
           '?type=' + this.dataType +
           '&custom_range_type=' + this.customRangeType +
           '&date=' + this.customDate;
-        // url = '/1.0/stats/top/user/by/points/per/' + this.customRangeType + '?from=' + dateFrom + '&to=' + dateTo;
 
       GM_xmlhttpRequest({
         method: 'GET',
         url: url,
         onload: function (response) {
-          if (response && response.responseText) {//console.log(response.responseText);
+          if (response && response.responseText) {
             if (response.responseText !== '[]') {
               let data = JSON.parse(response.responseText);
               dataCurrentlyInUse = data;
@@ -1353,7 +1351,6 @@ else {
 }
 
 
-
 // source: https://stackoverflow.com/a/14488776
 // to allow html code in the title option of a dialog window
 $.widget('ui.dialog', $.extend({}, $.ui.dialog.prototype, {
@@ -1375,68 +1372,4 @@ let intv = setInterval(function () {
   }
 }, 50);
 
-/*
- $('body').append(`
-    <button id="test-button" style="position: absolute; left: 100px; top: 10px; z-index: 101;">Test</button>
-  `);
-
-  let testFunction = function (previousDateTo) {
-    let date;
-    if (previousDateTo) {
-      previousDateTo.setDate(previousDateTo.getDate() + 1);
-      date = previousDateTo;
-    }
-    else {
-      date = new Date(2012, 1, 1);
-    }
-
-    if (date >= new Date()) {
-      console.log('done');
-      return;
-    }
-
-    let dateFrom = date.format('yyyy-mm-dd');
-    date.setDate(date.getDate() + 6);
-    let dateTo = date.format('yyyy-mm-dd');
-    $.when(
-      $.getJSON('/1.0/stats/top/user/by/points/per/day?from=' + dateFrom + '&to=' + dateTo),
-      $.getJSON('/1.0/stats/top/user/by/cubes/per/day?from=' + dateFrom + '&to=' + dateTo),
-      $.getJSON('/1.0/stats/top/user/by/trailblazes/per/day?from=' + dateFrom + '&to=' + dateTo),
-      $.getJSON('/1.0/stats/top/user/by/scouts/per/day?from=' + dateFrom + '&to=' + dateTo),
-      $.getJSON('/1.0/stats/top/user/by/scythes/per/day?from=' + dateFrom + '&to=' + dateTo),
-      $.getJSON('/1.0/stats/top/user/by/complete/per/day?from=' + dateFrom + '&to=' + dateTo)
-    ).
-    done(function (points, cubes, trailblazes, scouts, scythes, completes) {
-      GM_xmlhttpRequest({
-        method: 'POST',
-        url: 'http://ewstats.feedia.co/collect.php',
-        data: 'points=' + encodeURIComponent(points[2].responseText) +
-              '&cubes=' + encodeURIComponent(cubes[2].responseText) +
-              '&trailblazes=' + encodeURIComponent(trailblazes[2].responseText) +
-              '&scouts=' + encodeURIComponent(scouts[2].responseText) +
-              '&scythes=' + encodeURIComponent(scythes[2].responseText) +
-              '&completes=' + encodeURIComponent(completes[2].responseText),
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        onload: function (response) {
-          if (response && response.responseText) {
-            console.log(response.responseText, ': ', dateTo);
-            testFunction(date);
-          }
-        },
-        onerror: function (response) {
-          console.error('error: ', response);
-        },
-        ontimeout: function (response) {
-          console.error('timeout: ', response);
-        }
-      });
-    });
-  };
-
-  $('#test-button').click(function () {
-    testFunction();
-  });
-*/
 })(); // end: wrapper
