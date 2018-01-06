@@ -17,7 +17,7 @@
 /*jshint esversion: 6 */
 /*globals $, GM_xmlhttpRequest, Chart */
 
-const LOCAL = true;
+const LOCAL = false;
 if (LOCAL) {
   console.log('%c--== TURN OFF "LOCAL" BEFORE RELEASING!!! ==--', "color: red; font-style: italic; font-weight: bold;");
 }
@@ -331,6 +331,10 @@ function StatsPanel() {
         <div class="ewsNavButton selected" data-data-type="points">points</div>
         <div class="ewsNavButton" data-data-type="cubes">cubes</div>
         <div class="ewsNavButton" data-data-type="people">people</div>
+        <div class="ewsNavButton" data-data-type="trailblazes">trailblazes</div>
+        <div class="ewsNavButton" data-data-type="scouts">scouts</div>
+        <div class="ewsNavButton" data-data-type="scythes">scythes</div>
+        <div class="ewsNavButton" data-data-type="completes">completes</div>
       </div>
     </div>
     <div id="ewsCustomTimeRangeSelectionDialog">
@@ -473,7 +477,7 @@ function StatsPanel() {
 
   function optionsYears(select) {
     let str = '';
-    for (let i = 2017; i < 2100; i++) {
+    for (let i = 2012; i < 2100; i++) {
       str += '<option value="' + i + '"' + (i === select ? ' selected' : '') + '>' + i;
     }
 
@@ -555,7 +559,7 @@ function StatsPanel() {
   s.week.year.innerHTML = optionsYears(date.getFullYear());
   s.week.week.innerHTML = optionsWeeks(date.getFullYear(), date.getMonth() + 1, date.getDate());
 
-  s.month.year.innerHTML = optionsYears(year);
+  s.month.year.innerHTML = optionsYears(currentMonth === 1 ? year - 1 : year);
   s.month.month.innerHTML = optionsMonths(currentMonth - 1);
 
   s.customFrom.year.innerHTML = optionsYears(year);
@@ -748,6 +752,10 @@ function StatsPanel() {
           case 'cubes': lbl = 'cube'; break;
           case 'points': lbl = 'point'; break;
           case 'people': lbl = 'person'; break;
+          case 'trailblazes': lbl = 'trailblaze'; break;
+          case 'scouts': lbl = 'flag'; break;
+          case 'scythes': lbl = 'scythe'; break;
+          case 'completes': lbl = 'completion'; break;
         }
 
         if (val != 1) {
@@ -758,6 +766,12 @@ function StatsPanel() {
             lbl += 's';
           }
         }
+
+        dataCurrentlyInUse.sort(function (a, b) {
+          if (a.points > b.points) return -1;
+          if (a.points === b.points) return 0;
+          if (a.points < b.points) return 1;
+        });
 
         for (let row of dataCurrentlyInUse) {
           if (row.country === lCode) {
@@ -774,6 +788,10 @@ function StatsPanel() {
             case 'points': htmlRows += 'No points earned by players from '; break;
             case 'cubes':  htmlRows += 'No cubes traced by players from '; break;
             case 'people': htmlRows += 'No players from '; break;
+            case 'trailblazes': htmlRows += 'No trailblazes made by players from '; break;
+            case 'scouts': htmlRows += 'No flags made by players from '; break;
+            case 'scythes': htmlRows += 'No cubes scythed by players from '; break;
+            case 'completes': htmlRows += 'No completes made by players from '; break;
           }
           htmlRows += _this.map.regions[code].config.name + '</td></tr>';
         }
@@ -960,6 +978,22 @@ function StatsPanel() {
         html1 = 'There were';
         html2 = 'players ';
         break;
+      case 'trailblazes':
+        html1 = 'There were';
+        html2 = 'trailblazes ';
+        break;
+      case 'scouts':
+        html1 = 'There were';
+        html2 = 'flags ';
+        break;
+      case 'scythes':
+        html1 = 'There were';
+        html2 = 'cubes scythed ';
+        break;
+      case 'completes':
+        html1 = 'There were';
+        html2 = 'completes ';
+        break;
     }
 
     switch (this.timeRange) {
@@ -1096,6 +1130,22 @@ function StatsPanel() {
         html1 = 'players per country';
         html2 = '';
         break;
+      case 'trailblazes':
+        html1 = 'trailblazes per user';
+        html2 = 'trailblazes per country';
+        break;
+      case 'scouts':
+        html1 = 'flags per user';
+        html2 = 'flags per country';
+        break;
+      case 'scythes':
+        html1 = 'scythes per user';
+        html2 = 'scythes per country';
+        break;
+      case 'completes':
+        html1 = 'completes per user';
+        html2 = 'completes per country';
+        break;
     }
 
     html = 'Average of ' + html1 + ':<br><span>' + (this.dataType === 'people' ? this.countAverageOfPlayersPerCountry() : this.countAveragePerUser()) + '</span>';
@@ -1114,10 +1164,35 @@ function StatsPanel() {
     // we are checking for the class to take into account both clicking Apply
     // from the Custom dialog and changing the tabs at the bottom of the main dialog
     if (K.gid('ewsCustomPeriodSelection').classList.contains('selected')) {
-      url = 'https://ewstats.feedia.co/custom_stats.php' +
-        '?type=' + this.dataType +
-        '&custom_range_type=' + this.customRangeType +
-        '&date=' + this.customDate;
+        let date = this.customDate;
+        let dateFrom, dateTo, splittedDate;
+        switch (this.customRangeType) {
+          case 'day':
+            dateFrom = this.customDate;
+            dateTo = this.customDate;
+            break;
+          case 'week':
+            date = this.customDate.split('|');
+            dateFrom = date[1];
+            dateTo = date[2];
+            break;
+          case 'month':
+            splittedDate = date.split('-');
+            dateFrom = date + '-01';
+            dateTo = date + '-' + K.date.daysInMonth(splittedDate[0], splittedDate[1]);
+            break;
+          case 'custom':
+            splittedDate = date.split('|');
+            dateFrom = splittedDate[0];
+            dateTo = splittedDate[1];
+            this.customRangeType = 'day';
+            break;
+        }
+        url = 'http://ewstats.feedia.co/custom_stats.php' +
+          '?type=' + this.dataType +
+          '&custom_range_type=' + this.customRangeType +
+          '&date=' + this.customDate;
+        // url = '/1.0/stats/top/user/by/points/per/' + this.customRangeType + '?from=' + dateFrom + '&to=' + dateTo;
 
       GM_xmlhttpRequest({
         method: 'GET',
@@ -1149,11 +1224,15 @@ function StatsPanel() {
     else {
         url = 'https://eyewire.org/1.0/stats/top/players/by/';
 
-      if (this.dataType === 'points' || this.dataType === 'people') {
-        url += 'points';
-      }
-      else {
-        url += 'cubes';
+      switch (this.dataType) {
+        case 'people':
+          url += 'points';
+          break;
+        case 'completes':
+          url += 'complete';
+          break;
+        default:
+          url += this.dataType;
       }
 
       url += '/per/';
@@ -1296,5 +1375,68 @@ let intv = setInterval(function () {
   }
 }, 50);
 
+/*
+ $('body').append(`
+    <button id="test-button" style="position: absolute; left: 100px; top: 10px; z-index: 101;">Test</button>
+  `);
 
+  let testFunction = function (previousDateTo) {
+    let date;
+    if (previousDateTo) {
+      previousDateTo.setDate(previousDateTo.getDate() + 1);
+      date = previousDateTo;
+    }
+    else {
+      date = new Date(2012, 1, 1);
+    }
+
+    if (date >= new Date()) {
+      console.log('done');
+      return;
+    }
+
+    let dateFrom = date.format('yyyy-mm-dd');
+    date.setDate(date.getDate() + 6);
+    let dateTo = date.format('yyyy-mm-dd');
+    $.when(
+      $.getJSON('/1.0/stats/top/user/by/points/per/day?from=' + dateFrom + '&to=' + dateTo),
+      $.getJSON('/1.0/stats/top/user/by/cubes/per/day?from=' + dateFrom + '&to=' + dateTo),
+      $.getJSON('/1.0/stats/top/user/by/trailblazes/per/day?from=' + dateFrom + '&to=' + dateTo),
+      $.getJSON('/1.0/stats/top/user/by/scouts/per/day?from=' + dateFrom + '&to=' + dateTo),
+      $.getJSON('/1.0/stats/top/user/by/scythes/per/day?from=' + dateFrom + '&to=' + dateTo),
+      $.getJSON('/1.0/stats/top/user/by/complete/per/day?from=' + dateFrom + '&to=' + dateTo)
+    ).
+    done(function (points, cubes, trailblazes, scouts, scythes, completes) {
+      GM_xmlhttpRequest({
+        method: 'POST',
+        url: 'http://ewstats.feedia.co/collect.php',
+        data: 'points=' + encodeURIComponent(points[2].responseText) +
+              '&cubes=' + encodeURIComponent(cubes[2].responseText) +
+              '&trailblazes=' + encodeURIComponent(trailblazes[2].responseText) +
+              '&scouts=' + encodeURIComponent(scouts[2].responseText) +
+              '&scythes=' + encodeURIComponent(scythes[2].responseText) +
+              '&completes=' + encodeURIComponent(completes[2].responseText),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        onload: function (response) {
+          if (response && response.responseText) {
+            console.log(response.responseText, ': ', dateTo);
+            testFunction(date);
+          }
+        },
+        onerror: function (response) {
+          console.error('error: ', response);
+        },
+        ontimeout: function (response) {
+          console.error('timeout: ', response);
+        }
+      });
+    });
+  };
+
+  $('#test-button').click(function () {
+    testFunction();
+  });
+*/
 })(); // end: wrapper
