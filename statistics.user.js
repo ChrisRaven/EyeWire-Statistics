@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Statistics
 // @namespace    http://tampermonkey.net/
-// @version      3.0
+// @version      3.0.1
 // @description  Shows EyeWire Statistics
 // @author       Krzysztof Kruk
 // @match        https://*.eyewire.org/*
@@ -17,7 +17,7 @@
 /*jshint esversion: 6 */
 /*globals $, GM_xmlhttpRequest, Chart */
 
-const LOCAL = false;
+var LOCAL = false;
 if (LOCAL) {
   console.log('%c--== TURN OFF "LOCAL" BEFORE RELEASING!!! ==--', "color: red; font-style: italic; font-weight: bold;");
 }
