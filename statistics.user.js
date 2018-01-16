@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Statistics
 // @namespace    http://tampermonkey.net/
-// @version      3.0.1
+// @version      3.0.2
 // @description  Shows EyeWire Statistics
 // @author       Krzysztof Kruk
 // @match        https://*.eyewire.org/*
@@ -1366,7 +1366,7 @@ $.widget('ui.dialog', $.extend({}, $.ui.dialog.prototype, {
 
 
 let intv = setInterval(function () {
-  if (typeof Chart !== 'undefined') {
+    if (typeof Chart !== 'undefined' && K.gid('nav')) {
     clearInterval(intv);
     new StatsPanel(); // jshint ignore:line
   }
