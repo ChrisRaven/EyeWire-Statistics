@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Statistics
 // @namespace    http://tampermonkey.net/
-// @version      3.1
+// @version      3.1.1
 // @description  Shows EyeWire Statistics
 // @author       Krzysztof Kruk
 // @match        https://*.eyewire.org/*
@@ -1417,7 +1417,7 @@ if (LOCAL) {
   K.addCSSFile('http://127.0.0.1:8887/styles.css');
 }
 else {
-  K.addCSSFile('https://chrisraven.github.io/EyeWire-Statistics/styles.css');
+  K.addCSSFile('https://chrisraven.github.io/EyeWire-Statistics/styles.css?v=1');
 }
 
 
