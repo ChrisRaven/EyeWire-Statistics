@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Statistics
 // @namespace    http://tampermonkey.net/
-// @version      3.0.2
+// @version      3.1
 // @description  Shows EyeWire Statistics
 // @author       Krzysztof Kruk
 // @match        https://*.eyewire.org/*
@@ -21,7 +21,6 @@ var LOCAL = false;
 if (LOCAL) {
   console.log('%c--== TURN OFF "LOCAL" BEFORE RELEASING!!! ==--', "color: red; font-style: italic; font-weight: bold;");
 }
-
 
 // source: https://eyewire.org/1.0/countries/
 const countries = {"af":"Afghanistan","ax":"Aland Islands","al":"Albania","dz":"Algeria","as":"American Samoa","ad":"Andorra","ao":"Angola","ai":"Anguilla","aq":"Antarctica","ag":"Antigua and Barbuda","ar":"Argentina","am":"Armenia","aw":"Aruba","au":"Australia","at":"Austria","az":"Azerbaijan","bs":"Bahamas","bh":"Bahrain","bd":"Bangladesh","bb":"Barbados","by":"Belarus","be":"Belgium","bz":"Belize","bj":"Benin","bm":"Bermuda","bt":"Bhutan","bo":"Bolivia","bq":"Bonaire, Saint Eustatius and Saba","ba":"Bosnia and Herzegovina","bw":"Botswana","br":"Brazil","io":"British Indian Ocean Territory","bn":"Brunei Darussalam","bg":"Bulgaria","bf":"Burkina Faso","bi":"Burundi","kh":"Cambodia","cm":"Cameroon","ca":"Canada","cv":"Cape Verde","ky":"Cayman Islands","cf":"Central African Republic","td":"Chad","cl":"Chile","cn":"China","cx":"Christmas Island","cc":"Cocos (Keeling) Islands","co":"Colombia","km":"Comoros","cg":"Congo","cd":"Congo, The Democratic Republic of the","ck":"Cook Islands","cr":"Costa Rica","ci":"Cote D'Ivoire","hr":"Croatia","cu":"Cuba","cw":"Curacao","cy":"Cyprus","cz":"Czech Republic","dk":"Denmark","dj":"Djibouti","dm":"Dominica","do":"Dominican Republic","ec":"Ecuador","eg":"Egypt","sv":"El Salvador","gq":"Equatorial Guinea","er":"Eritrea","ee":"Estonia","et":"Ethiopia","eu":"Europe","hq":"EyeWire HQ","fk":"Falkland Islands (Malvinas)","fo":"Faroe Islands","fj":"Fiji","fi":"Finland","fr":"France","gf":"French Guiana","pf":"French Polynesia","tf":"French Southern Territories","ga":"Gabon","gm":"Gambia","ge":"Georgia","de":"Germany","gh":"Ghana","gi":"Gibraltar","gr":"Greece","gl":"Greenland","gd":"Grenada","gp":"Guadeloupe","gu":"Guam","gt":"Guatemala","gg":"Guernsey","gn":"Guinea","gw":"Guinea-Bissau","gy":"Guyana","ht":"Haiti","va":"Holy See (Vatican City State)","hn":"Honduras","hk":"Hong Kong","hu":"Hungary","is":"Iceland","in":"India","id":"Indonesia","ir":"Iran, Islamic Republic of","iq":"Iraq","ie":"Ireland","im":"Isle of Man","il":"Israel","it":"Italy","jm":"Jamaica","jp":"Japan","je":"Jersey","jo":"Jordan","kz":"Kazakhstan","ke":"Kenya","ki":"Kiribati","kp":"Korea, Democratic People's Republic of","kr":"Korea, Republic of","kw":"Kuwait","kg":"Kyrgyzstan","la":"Lao People's Democratic Republic","lv":"Latvia","lb":"Lebanon","ls":"Lesotho","lr":"Liberia","ly":"Libya","li":"Liechtenstein","lt":"Lithuania","lu":"Luxembourg","mo":"Macau","mk":"Macedonia","mg":"Madagascar","mw":"Malawi","my":"Malaysia","mv":"Maldives","ml":"Mali","mt":"Malta","mh":"Marshall Islands","mq":"Martinique","mr":"Mauritania","mu":"Mauritius","yt":"Mayotte","mx":"Mexico","fm":"Micronesia, Federated States of","md":"Moldova, Republic of","mc":"Monaco","mn":"Mongolia","me":"Montenegro","ms":"Montserrat","ma":"Morocco","mz":"Mozambique","mm":"Myanmar","na":"Namibia","nr":"Nauru","np":"Nepal","nl":"Netherlands","nc":"New Caledonia","nz":"New Zealand","ni":"Nicaragua","ne":"Niger","ng":"Nigeria","nu":"Niue","nf":"Norfolk Island","mp":"Northern Mariana Islands","no":"Norway","om":"Oman","pk":"Pakistan","pw":"Palau","ps":"Palestinian Territory","pa":"Panama","pg":"Papua New Guinea","py":"Paraguay","pe":"Peru","ph":"Philippines","pn":"Pitcairn Islands","pl":"Poland","pt":"Portugal","pr":"Puerto Rico","qa":"Qatar","re":"Reunion","ro":"Romania","ru":"Russian Federation","rw":"Rwanda","bl":"Saint Barthelemy","sh":"Saint Helena","kn":"Saint Kitts and Nevis","lc":"Saint Lucia","mf":"Saint Martin","pm":"Saint Pierre and Miquelon","vc":"Saint Vincent and the Grenadines","ws":"Samoa","sm":"San Marino","st":"Sao Tome and Principe","sa":"Saudi Arabia","sn":"Senegal","rs":"Serbia","sc":"Seychelles","sl":"Sierra Leone","sg":"Singapore","sx":"Sint Maarten (Dutch part)","sk":"Slovakia","si":"Slovenia","sb":"Solomon Islands","so":"Somalia","za":"South Africa","gs":"South Georgia and the South Sandwich Islands","ss":"South Sudan","es":"Spain","lk":"Sri Lanka","sd":"Sudan","sr":"Suriname","sj":"Svalbard and Jan Mayen","sz":"Swaziland","se":"Sweden","ch":"Switzerland","sy":"Syrian Arab Republic","tw":"Taiwan","tj":"Tajikistan","tz":"Tanzania, United Republic of","th":"Thailand","tl":"Timor-Leste","tg":"Togo","tk":"Tokelau","to":"Tonga","tt":"Trinidad and Tobago","tn":"Tunisia","tr":"Turkey","tm":"Turkmenistan","tc":"Turks and Caicos Islands","tv":"Tuvalu","ug":"Uganda","ua":"Ukraine","ae":"United Arab Emirates","gb":"United Kingdom","us":"United States","um":"United States Minor Outlying Islands","rd":"Unknown","uy":"Uruguay","uz":"Uzbekistan","vu":"Vanuatu","ve":"Venezuela","vn":"Vietnam","vg":"Virgin Islands, British","vi":"Virgin Islands, U.S.","wf":"Wallis and Futuna","eh":"Western Sahara","ye":"Yemen","zm":"Zambia","zw":"Zimbabwe"};
@@ -307,10 +306,11 @@ function StatsPanel() {
   $('body').append(
    `<div id=ewsPanel>
       <div class="ewsNavButtonGroup" id=ewsTimeRangeSelection>
-        <div class="ewsNavButton selected" data-time-range="day">today</div>
-        <div class="ewsNavButton" data-time-range="week">week</div>
-        <div class="ewsNavButton" data-time-range="month">month</div>
-        <div class="ewsNavButton" id="ewsCustomPeriodSelection" data-time-range="custom">custom</div>
+        <div class="ewsNavButton selected" data-time-range="day">TODAY</div>
+        <div class="ewsNavButton" data-time-range="week">WEEK</div>
+        <div class="ewsNavButton" data-time-range="month">MONTH</div>
+        <div class="ewsNavButton" id="ewsCustomPeriodSelection" data-time-range="custom">CUSTOM</div>
+        <div class="ewsNavButton" id="ewsTop100" data-time-range="top100">TOP 100</div>
       </div>
       <table id=ewsChartWrapper>
         <tr>
@@ -327,6 +327,17 @@ function StatsPanel() {
           </td>
         </tr>
       </table>
+      <div id=ewsTop100List_wrapper>
+      <table id=ewsTop100List>
+        <tr>
+          <td id=top100perDay></td>
+          <td id=top100perWeek></td>
+          <td id=top100perMonth></td>
+          <td id=top100perYear></td>
+          <td id=top100perForever></td>
+        </tr>
+      </table>
+      </div>
       <div class="ewsNavButtonGroup" id=ewsDataTypeSelection>
         <div class="ewsNavButton selected" data-data-type="points">points</div>
         <div class="ewsNavButton" data-data-type="cubes">cubes</div>
@@ -384,7 +395,7 @@ function StatsPanel() {
         </tbody>
       </table>
     </div>
-    <div id=ewsWorldMap style="width: 873px;"></div>
+    <div id=ewsWorldMap style="width: 950px;"></div>
     `
   );
 
@@ -1156,6 +1167,40 @@ function StatsPanel() {
 
     K.gid('ewsAvg').innerHTML = html;
   };
+  
+  this.switchContentType = function (type = 'charts') {
+    if (type === 'charts') {
+      $('#ewsWorldMap, #ewsChartWrapper').show();
+      $('#ewsTop100List_wrapper').hide();
+    }
+    else if (type === 'lists') {
+      $('#ewsWorldMap, #ewsChartWrapper').hide();
+      $('#ewsTop100List_wrapper').show();
+    }
+  }
+  
+  this.generateTop100Table = function (data, header) {
+    let lCode, html = '<div><table>';
+
+    html += '<thead><tr><th colspan=4>' + header + '</th></tr></thead>';
+    html += '<tbody>';
+    for (let i = 0; i < data.length; i++) {
+      lCode = data[i].country_code;
+
+      html += `
+        <tr>
+          <td>` + (i + 1) + `</td>
+          <td>` + (lCode === 'rd' ? '' : '<img src="https://eyewire.org/static/images/flags/' + lCode + '.png">') + `</td>
+          <td>` + (data[i].uid == account.account.uid ? '<span style="color: #3fff00;">' + data[i].name + '</span>' : data[i].name) + `</td>
+          <td>` + data[i].score + `</td>
+        </tr>
+      `;
+    }
+
+    html += '</tbody></table></div>';
+
+    return html;
+  }
 
 
   this.getData = function () {
@@ -1164,6 +1209,7 @@ function StatsPanel() {
     // we are checking for the class to take into account both clicking Apply
     // from the Custom dialog and changing the tabs at the bottom of the main dialog
     if (K.gid('ewsCustomPeriodSelection').classList.contains('selected')) {
+      this.switchContentType('charts');
         let date = this.customDate;
         let dateFrom, dateTo, splittedDate;
         switch (this.customRangeType) {
@@ -1219,8 +1265,32 @@ function StatsPanel() {
         }
       });
     }
+    else if (K.gid('ewsTop100').classList.contains('selected')) {
+      this.switchContentType('lists');
+      GM_xmlhttpRequest({
+        method: 'GET',
+        url: 'http://ewstats.feedia.co/get_top100.php?type=' + this.dataType,
+        onload: function (response) {
+          if (response && response.responseText) {
+            if (response.responseText !== '[]') {
+              let json = JSON.parse(response.responseText);
+
+              K.gid('top100perDay').innerHTML = _this.generateTop100Table(json.day, 'best day');
+              K.gid('top100perWeek').innerHTML = _this.generateTop100Table(json.week, 'best week');
+              K.gid('top100perMonth').innerHTML = _this.generateTop100Table(json.month, 'best month');
+              K.gid('top100perYear').innerHTML = _this.generateTop100Table(json.year, 'best year');
+              K.gid('top100perForever').innerHTML = _this.generateTop100Table(json.forever, 'all time best');
+            }
+          }
+        },
+        onerror: function (response) {
+          console.error('error: ', response);
+        }
+      });
+    }
     else {
-        url = 'https://eyewire.org/1.0/stats/top/players/by/';
+      this.switchContentType('charts');
+      url = 'https://eyewire.org/1.0/stats/top/players/by/';
 
       switch (this.dataType) {
         case 'people':
@@ -1273,7 +1343,7 @@ function StatsPanel() {
     show: true,
     dialogClass: 'ews-dialog',
     title: 'EyeWire Statistics <div class="blinky" id=ewsLoader>',
-    width: 900,
+    width: 960,
     open: function (event, ui) {
       let el = K.gid('ewsWorldMap');
       if (el.parentNode.tagName === 'BODY') {
@@ -1344,7 +1414,7 @@ function StatsPanel() {
 K.addCSSFile('https://chrisraven.github.io/EyeWire-Statistics/jquery-jvectormap-2.0.3.css');
 
 if (LOCAL) {
-  K.addCSSFile('http://127.0.0.1:8887/statistics.css');
+  K.addCSSFile('http://127.0.0.1:8887/styles.css');
 }
 else {
   K.addCSSFile('https://chrisraven.github.io/EyeWire-Statistics/styles.css');
