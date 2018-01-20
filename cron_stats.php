@@ -1,5 +1,9 @@
 <?php
-require '../credentials/pass.php';
+$host = '???';
+$dbname = '???';
+$user = '???';
+$pass = '???';
+
 
 date_default_timezone_set('America/New_York');
 $yesterday = date('Y-m-d', strtotime('yesterday'));
@@ -14,8 +18,13 @@ function collectTheData($type) {
 
   try {
     $JSON = file_get_contents("https://eyewire.org/1.0/stats/top/user/by/{$type}/per/day?from={$yesterday}&to={$yesterday}");
-    if (!$JSON) {
+
+    if (!$JSON || $JSON === '[]' || $JSON === '{}') {
       return false;
+    }
+
+    if ($type === 'complete') {
+      $type .= 's';
     }
 
     $query1 = "INSERT INTO results (uid, date, {$type}) VALUES ";

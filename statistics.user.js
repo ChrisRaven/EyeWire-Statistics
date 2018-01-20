@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Statistics
 // @namespace    http://tampermonkey.net/
-// @version      3.1.1
+// @version      3.1.2
 // @description  Shows EyeWire Statistics
 // @author       Krzysztof Kruk
 // @match        https://*.eyewire.org/*
@@ -339,9 +339,9 @@ function StatsPanel() {
       </table>
       </div>
       <div class="ewsNavButtonGroup" id=ewsDataTypeSelection>
-        <div class="ewsNavButton selected" data-data-type="points">points</div>
+        <div class="ewsNavButton selected" id="ewsPoints" data-data-type="points">points</div>
         <div class="ewsNavButton" data-data-type="cubes">cubes</div>
-        <div class="ewsNavButton" data-data-type="people">people</div>
+        <div class="ewsNavButton" id="ewsPeople" data-data-type="people">people</div>
         <div class="ewsNavButton" data-data-type="trailblazes">trailblazes</div>
         <div class="ewsNavButton" data-data-type="scouts">scouts</div>
         <div class="ewsNavButton" data-data-type="scythes">scythes</div>
@@ -648,7 +648,7 @@ function StatsPanel() {
   this.generateTableRow = function (position, flag, name, value, highlight) {
     return '<tr class="ewsRankingRow' + (highlight ? 'Highlight' : 'Normal') + '">' + // highlighting currently not used
         '<td>' + position + '</td>' +
-        '<td>' + (flag === 'rd' || flag === ' ' ? '&nbsp;' : '<img src="https://eyewire.org/static/images/flags/' + flag + '.png">') + '</td>' +
+        '<td>' + (flag === 'rd' || flag === ' ' ? '&nbsp;' : '<img src="/static/images/flags/' + flag + '.png">') + '</td>' +
         '<td><div class="ewsCountryNameWrapper">' + name + '</div></td>' +
         '<td>' + value + '</td>' +
       '</tr>';
@@ -808,7 +808,7 @@ function StatsPanel() {
         }
 
         el.html('<div>' +
-          (code == 'rd' ? '' : '<img src="https://eyewire.org/static/images/flags/' + lCode + '.png">') +
+          (code == 'rd' ? '' : '<img src="/static/images/flags/' + lCode + '.png">') +
           el.html() + ' - ' + (val === undefined ? 0 : val) + ' ' + lbl +'<hr>' +
             '<table>' + htmlRows + '</table>' +
           '</div>'
@@ -1170,11 +1170,15 @@ function StatsPanel() {
   
   this.switchContentType = function (type = 'charts') {
     if (type === 'charts') {
-      $('#ewsWorldMap, #ewsChartWrapper').show();
+      $('#ewsWorldMap, #ewsChartWrapper, #ewsPeople').show();
       $('#ewsTop100List_wrapper').hide();
     }
     else if (type === 'lists') {
-      $('#ewsWorldMap, #ewsChartWrapper').hide();
+      if (K.gid('ewsPeople').classList.contains('selected')) {
+        K.gid('ewsPoints').click();
+      }
+
+      $('#ewsWorldMap, #ewsChartWrapper, #ewsPeople').hide();
       $('#ewsTop100List_wrapper').show();
     }
   }
@@ -1190,7 +1194,7 @@ function StatsPanel() {
       html += `
         <tr>
           <td>` + (i + 1) + `</td>
-          <td>` + (lCode === 'rd' ? '' : '<img src="https://eyewire.org/static/images/flags/' + lCode + '.png">') + `</td>
+          <td>` + (lCode === 'rd' ? '' : '<img src="/static/images/flags/' + lCode + '.png">') + `</td>
           <td>` + (data[i].uid == account.account.uid ? '<span style="color: #3fff00;">' + data[i].name + '</span>' : data[i].name) + `</td>
           <td>` + data[i].score + `</td>
         </tr>
@@ -1233,7 +1237,7 @@ function StatsPanel() {
             dateTo = splittedDate[1];
             break;
         }
-        url = 'http://ewstats.feedia.co/custom_stats.php' +
+        url = 'https://ewstats.feedia.co/custom_stats.php' +
           '?type=' + this.dataType +
           '&custom_range_type=' + this.customRangeType +
           '&date=' + this.customDate;
@@ -1269,7 +1273,7 @@ function StatsPanel() {
       this.switchContentType('lists');
       GM_xmlhttpRequest({
         method: 'GET',
-        url: 'http://ewstats.feedia.co/get_top100.php?type=' + this.dataType,
+        url: 'https://ewstats.feedia.co/get_top100.php?type=' + this.dataType,
         onload: function (response) {
           if (response && response.responseText) {
             if (response.responseText !== '[]') {
@@ -1290,7 +1294,7 @@ function StatsPanel() {
     }
     else {
       this.switchContentType('charts');
-      url = 'https://eyewire.org/1.0/stats/top/players/by/';
+      url = '/1.0/stats/top/players/by/';
 
       switch (this.dataType) {
         case 'people':
@@ -1357,7 +1361,7 @@ function StatsPanel() {
       $('.ui-widget-overlay').click(function() { // close by clicking outside the window
         $('#ewsPanel').dialog('close');
       });
-      _this.map.updateSize();
+      // _this.map.updateSize();
       _this.getData();
     }
   });
