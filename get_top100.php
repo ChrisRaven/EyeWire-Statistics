@@ -44,4 +44,6 @@ $result->nextRowset();
 prepareResults('forever');
 $result->nextRowset();
 
+header('Access-Control-Allow-Origin: *');
+
 echo json_encode($allResults);

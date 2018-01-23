@@ -1,13 +1,12 @@
 // ==UserScript==
 // @name         Statistics
 // @namespace    http://tampermonkey.net/
-// @version      3.1.2
+// @version      3.1.3
 // @description  Shows EyeWire Statistics
 // @author       Krzysztof Kruk
 // @match        https://*.eyewire.org/*
 // @exclude      https://*.eyewire.org/1.0/*
 // @downloadURL  https://raw.githubusercontent.com/ChrisRaven/EyeWire-Statistics/master/statistics.user.js
-// @grant        GM_xmlhttpRequest
 // @connect      ewstats.feedia.co
 // @require      https://chrisraven.github.io/EyeWire-Statistics/jquery-jvectormap-2.0.3.min.js
 // @require      https://chrisraven.github.io/EyeWire-Statistics/jquery-jvectormap-world-mill.js
@@ -15,7 +14,7 @@
 // ==/UserScript==
 
 /*jshint esversion: 6 */
-/*globals $, GM_xmlhttpRequest, Chart */
+/*globals $, Chart */
 
 var LOCAL = false;
 if (LOCAL) {
@@ -64,6 +63,25 @@ const countries = {"af":"Afghanistan","ax":"Aland Islands","al":"Albania","dz":"
     hex: function (x) {
       x = x.toString(16);
       return (x.length == 1) ? '0' + x : x;
+    },
+    
+    JSON_CORS: function (params) {
+      fetch(params.url, {
+        method: params.method,
+        // mode: 'cors'
+      })
+      .then(function (response) {
+        if (response.ok) {
+          return response.json();
+        }
+        throw new Error('Something went wrong');
+      })
+      .then(function (json) {
+        params.onload(json);
+      })
+      .catch(function (error) {
+        params.onerror(error);
+      });
     },
 
     date: {
@@ -1242,53 +1260,46 @@ function StatsPanel() {
           '&custom_range_type=' + this.customRangeType +
           '&date=' + this.customDate;
 
-      GM_xmlhttpRequest({
+      K.JSON_CORS({
         method: 'GET',
         url: url,
         onload: function (response) {
-          if (response && response.responseText) {
-            if (response.responseText !== '[]') {
-              let data = JSON.parse(response.responseText);
-              dataCurrentlyInUse = data;
-              data = _this.groupByCountry(data);
-              _this.updateMap(data);
-              _this.updateChart(data);
-              _this.updateTable(data);
-              _this.updateAverages();
-            }
-            else {
-              _this.updateMap('no-data');
-              _this.updateChart('no-data');
-              _this.updateTable('no-data', 0);
-              _this.updateAverages('no-data');
-            }
+          if (response) {
+            dataCurrentlyInUse = response;
+            let data = _this.groupByCountry(response);
+            _this.updateMap(data);
+            _this.updateChart(data);
+            _this.updateTable(data);
+            _this.updateAverages();
+          }
+          else {
+            _this.updateMap('no-data');
+            _this.updateChart('no-data');
+            _this.updateTable('no-data', 0);
+            _this.updateAverages('no-data');
           }
         },
-        onerror: function (response) {
-          console.error('error: ', response);
+        onerror: function (error) {
+          console.error('error: ', error.message);
         }
       });
     }
     else if (K.gid('ewsTop100').classList.contains('selected')) {
       this.switchContentType('lists');
-      GM_xmlhttpRequest({
+      K.JSON_CORS({
         method: 'GET',
         url: 'https://ewstats.feedia.co/get_top100.php?type=' + this.dataType,
         onload: function (response) {
-          if (response && response.responseText) {
-            if (response.responseText !== '[]') {
-              let json = JSON.parse(response.responseText);
-
-              K.gid('top100perDay').innerHTML = _this.generateTop100Table(json.day, 'best day');
-              K.gid('top100perWeek').innerHTML = _this.generateTop100Table(json.week, 'best week');
-              K.gid('top100perMonth').innerHTML = _this.generateTop100Table(json.month, 'best month');
-              K.gid('top100perYear').innerHTML = _this.generateTop100Table(json.year, 'best year');
-              K.gid('top100perForever').innerHTML = _this.generateTop100Table(json.forever, 'all time best');
-            }
+          if (response) {
+            K.gid('top100perDay').innerHTML = _this.generateTop100Table(response.day, 'best day');
+            K.gid('top100perWeek').innerHTML = _this.generateTop100Table(response.week, 'best week');
+            K.gid('top100perMonth').innerHTML = _this.generateTop100Table(response.month, 'best month');
+            K.gid('top100perYear').innerHTML = _this.generateTop100Table(response.year, 'best year');
+            K.gid('top100perForever').innerHTML = _this.generateTop100Table(response.forever, 'all time best');
           }
         },
-        onerror: function (response) {
-          console.error('error: ', response);
+        onerror: function (error) {
+          console.error('error: ', error.message);
         }
       });
     }
