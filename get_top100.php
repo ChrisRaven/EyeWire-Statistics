@@ -49,5 +49,5 @@ $domain = $_SERVER['HTTP_ORIGIN'];
 if (in_array($domain, ['https://eyewire.org', 'https://beta.eyewire.org', 'https://chris.eyewire.org
 '])) {
   header('Access-Control-Allow-Origin: ' . $domain);
-echo json_encode($allResults);
+  echo json_encode($allResults);
 }
