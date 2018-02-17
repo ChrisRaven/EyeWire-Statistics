@@ -332,3 +332,7 @@
 #ewsTop100List table tr td:nth-child(4) {
   text-align: right;
 }
+
+.statsUsername {
+  cursor: pointer;
+}

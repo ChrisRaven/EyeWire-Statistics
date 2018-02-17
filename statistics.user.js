@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Statistics
 // @namespace    http://tampermonkey.net/
-// @version      3.1.3
+// @version      3.2
 // @description  Shows EyeWire Statistics
 // @author       Krzysztof Kruk
 // @match        https://*.eyewire.org/*
@@ -1213,7 +1213,7 @@ function StatsPanel() {
         <tr>
           <td>` + (i + 1) + `</td>
           <td>` + (lCode === 'rd' ? '' : '<img src="/static/images/flags/' + lCode + '.png">') + `</td>
-          <td>` + (data[i].uid == account.account.uid ? '<span style="color: #3fff00;">' + data[i].name + '</span>' : data[i].name) + `</td>
+          <td class="statsUsername">` + (data[i].uid == account.account.uid ? '<span style="color: #3fff00;">' + data[i].name + '</span>' : data[i].name) + `</td>
           <td>` + data[i].score + `</td>
         </tr>
       `;
@@ -1420,6 +1420,10 @@ function StatsPanel() {
       _this.getData();
     }
   });
+  
+  $(document).on('click', '.statsUsername', function () {
+    Profile.show({username: this.textContent});
+  });
 
   this.createChart('points');
 }
@@ -1432,7 +1436,7 @@ if (LOCAL) {
   K.addCSSFile('http://127.0.0.1:8887/styles.css');
 }
 else {
-  K.addCSSFile('https://chrisraven.github.io/EyeWire-Statistics/styles.css?v=1');
+  K.addCSSFile('https://chrisraven.github.io/EyeWire-Statistics/styles.css?v=2');
 }
 
 
