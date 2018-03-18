@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Statistics
 // @namespace    http://tampermonkey.net/
-// @version      3.2
+// @version      3.2.1
 // @description  Shows EyeWire Statistics
 // @author       Krzysztof Kruk
 // @match        https://*.eyewire.org/*
@@ -1296,6 +1296,10 @@ function StatsPanel() {
             K.gid('top100perMonth').innerHTML = _this.generateTop100Table(response.month, 'best month');
             K.gid('top100perYear').innerHTML = _this.generateTop100Table(response.year, 'best year');
             K.gid('top100perForever').innerHTML = _this.generateTop100Table(response.forever, 'all time best');
+            
+            setTimeout(function () {
+              $('#ewsTop100List table').css({'border-spacing': '1px 0'});
+            }, 0);
           }
         },
         onerror: function (error) {
