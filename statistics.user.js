@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Statistics
 // @namespace    http://tampermonkey.net/
-// @version      3.2.1
+// @version      3.2.2
 // @description  Shows EyeWire Statistics
 // @author       Krzysztof Kruk
 // @match        https://*.eyewire.org/*
@@ -735,6 +735,10 @@ function StatsPanel() {
 
     if (this.dataType !== 'people') {
       for (let row of data) {
+        if (row.country === null) {
+          row.country = 'rd';
+          row.country_name = 'Unknown';
+        }
         country = row.country.toUpperCase();
         if (!grouped[country]) {
           grouped[country] = row.points;
@@ -746,6 +750,10 @@ function StatsPanel() {
     }
     else {
       for (let row of data) {
+        if (row.country === null) {
+          row.country = 'rd';
+          row.country_name = 'Unknown';
+        }
         country = row.country.toUpperCase();
         if (!grouped[country]) {
           grouped[country] = 1;
