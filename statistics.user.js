@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Statistics
 // @namespace    http://tampermonkey.net/
-// @version      3.2.2
+// @version      3.2.2.1
 // @description  Shows EyeWire Statistics
 // @author       Krzysztof Kruk
 // @match        https://*.eyewire.org/*
@@ -308,15 +308,11 @@ function StatsPanel() {
     a.id = 'ewsLink';
     a.innerHTML = 'Stats';
     li.appendChild(a);
-    list = K.gid('nav').getElementsByTagName('ul')[0];
+    list = K.gid('links').getElementsByTagName('ul')[0];
     if (list) {
-      list.insertBefore(li, list.lastChild.previousSibling); // for some reason the last child (the "Challenge" button) isn't the last child)
+      list.insertBefore(li, list.lastChild.previousSibling);
     }
-    else {
-      let ul = document.createElement('ul');
-      ul.appendChild(li);
-      K.gid('homelogo').after(ul);
-    }
+
 
   })();
 
