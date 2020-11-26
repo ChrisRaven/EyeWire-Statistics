@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Statistics
 // @namespace    http://tampermonkey.net/
-// @version      3.2.2.1
+// @version      4.0.0.0
 // @description  Shows EyeWire Statistics
 // @author       Krzysztof Kruk
 // @match        https://*.eyewire.org/*
@@ -1259,7 +1259,7 @@ function StatsPanel() {
             dateTo = splittedDate[1];
             break;
         }
-        url = 'https://ewstats.feedia.co/custom_stats.php' +
+        url = 'https://ewstats.heliohost.us/custom_stats.php' +
           '?type=' + this.dataType +
           '&custom_range_type=' + this.customRangeType +
           '&date=' + this.customDate;
@@ -1292,7 +1292,7 @@ function StatsPanel() {
       this.switchContentType('lists');
       K.JSON_CORS({
         method: 'GET',
-        url: 'https://ewstats.feedia.co/get_top100.php?type=' + this.dataType,
+        url: 'https://ewstats.heliohost.us/get_top100.php?type=' + this.dataType,
         onload: function (response) {
           if (response) {
             K.gid('top100perDay').innerHTML = _this.generateTop100Table(response.day, 'best day');

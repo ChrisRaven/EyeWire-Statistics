@@ -12,7 +12,7 @@ if (!in_array($type, ['points', 'cubes', 'trailblazes', 'scouts', 'scythes', 'co
   return false;
 }
 
-$query = "CALL get_top100('{$type}')";
+$query = "CALL get_top100_{$type}()";
 
 $result = $pdo->query($query);
 
