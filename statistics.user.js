@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         Statistics
 // @namespace    http://tampermonkey.net/
-// @version      4.0.0.0
+// @version      4.0.0.1
 // @description  Shows EyeWire Statistics
 // @author       Krzysztof Kruk
 // @match        https://*.eyewire.org/*
 // @exclude      https://*.eyewire.org/1.0/*
 // @downloadURL  https://raw.githubusercontent.com/ChrisRaven/EyeWire-Statistics/master/statistics.user.js
-// @connect      ewstats.feedia.co
+// @connect      ewstats.heliohost.us
 // @require      https://chrisraven.github.io/EyeWire-Statistics/jquery-jvectormap-2.0.3.min.js
 // @require      https://chrisraven.github.io/EyeWire-Statistics/jquery-jvectormap-world-mill.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js
